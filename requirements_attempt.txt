@@ -1,0 +1,15 @@
+# Attempted requirements file...
+
+# platform: linux-64
+python==3.10.13
+ipython==8.15.0
+ipywidgets==8.0.4
+lightning==2.3.0
+matplotlib==3.8.0
+nbstripout==0.8.0
+numpy==1.26.0
+torch==2.1.1
+torchtyping==0.1.4
+torchvision==0.16.1
+tqdm==4.65.0
+wandb==0.14.0
