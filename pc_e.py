@@ -3,7 +3,8 @@ from typing import Optional
 import torch
 import torch.nn.functional as F
 from lightning import LightningModule
-
+from torch.optim.lr_scheduler import LambdaLR
+import math
 
 class PCE(LightningModule):
     def __init__(
@@ -12,6 +13,10 @@ class PCE(LightningModule):
         iters: int,
         e_lr: float,
         w_lr: float,
+        w_decay: float = 0.0,
+        output_loss = "mse",
+        nm_batches=None,
+        nm_epochs=None,
     ):
         super().__init__()
 
@@ -25,6 +30,18 @@ class PCE(LightningModule):
         self.iters = iters
         self.e_lr = e_lr
         self.w_lr = w_lr
+        self.w_decay = w_decay
+
+        if output_loss == "mse":
+            mse = torch.nn.MSELoss(reduction="sum")
+            self.output_loss = lambda y_pred, y: 0.5 * mse(y_pred, y)
+        elif output_loss == "ce":
+            self.output_loss = torch.nn.CrossEntropyLoss(reduction="sum")
+
+        self.nm_batches = nm_batches
+        self.nm_epochs = nm_epochs
+
+        self.weight_loss_scaling = min([1.0, e_lr * iters]) # to avoid tiny errors from inference
 
     def y_pred(self, x: torch.Tensor):
         s_i = x
@@ -36,10 +53,39 @@ class PCE(LightningModule):
         # For error optimization: reduction = "sum"
         # For weight optimization: reduction = "mean"
         # (but we just manually divide by batch_size in training_step)
-        return 0.5 * F.mse_loss(y_pred, y, reduction="sum")
+        return self.output_loss(y_pred, y)
 
     def configure_optimizers(self):
-        return torch.optim.Adam(self.layers.parameters(), lr=self.w_lr)
+        base_lr = self.w_lr
+        peak_lr = 1.1 * base_lr
+        end_lr = 0.1 * base_lr
+
+        total_steps = self.nm_batches * self.nm_epochs
+        warmup_steps = int(0.1 * total_steps)
+
+        optimizer = torch.optim.Adam(self.layers.parameters(), lr=1.0, weight_decay=self.w_decay)
+
+        def lr_lambda(current_step):
+            if current_step < warmup_steps:
+                # Linear warmup from base_lr to peak_lr
+                return base_lr + (peak_lr - base_lr) * (current_step / warmup_steps)
+            else:
+                # Cosine decay from peak_lr to end_lr
+                progress = (current_step - warmup_steps) / max(1, total_steps - warmup_steps)
+                cosine_decay = 0.5 * (1 + math.cos(math.pi * progress))
+                decayed = end_lr + (peak_lr - end_lr) * cosine_decay
+                return decayed
+
+        scheduler = LambdaLR(optimizer, lr_lambda=lr_lambda) # acts as multiplier of base lr set to 1.0
+        return {
+            "optimizer": optimizer,
+            "lr_scheduler": {
+                "scheduler": scheduler,
+                "interval": "step", 
+                "frequency": 1
+            }
+        }
+        return torch.optim.Adam(self.layers.parameters(), lr=self.w_lr, weight_decay=self.w_decay)
 
     def E(self, x: torch.Tensor, y: torch.Tensor):
         """
@@ -83,7 +129,6 @@ class PCE(LightningModule):
 
     def minimize_error_energy(self, x: torch.Tensor, y: torch.Tensor):
         """Novel PC energy minimization, using errors instead of states"""
-
         # Deactivate autograd on params
         for p in self.layers.parameters():
             p.requires_grad_(False)
@@ -127,7 +172,7 @@ class PCE(LightningModule):
         self.log("E_local", E_final, prog_bar=True)
 
         # For weight optimization, we must average E over the batch.
-        return E_final / self.batch_size  # = loss function for Lightning to minimize wrt params
+        return E_final / (self.batch_size * self.weight_loss_scaling)  # = loss function for Lightning to minimize wrt params
 
     def validation_step(self, batch: dict[str, torch.Tensor], batch_idx):
         self.forward(x=batch["img"])
@@ -184,7 +229,7 @@ class PCE(LightningModule):
         states = ff_init(x)
 
         # Minimize energy via the states
-        state_optim = torch.optim.SGD(states, lr=s_lr)
+        state_optim = torch.optim.Adam(states, lr=s_lr)
         for _ in range(iters):
             state_optim.zero_grad()
             E = self.E_states_only(x, y, states)
@@ -197,3 +242,37 @@ class PCE(LightningModule):
 
         # No need to store in self.states, just return for later use in callbacks
         return states
+
+
+class PCESkipConnection(PCE):
+    def __init__(
+        self,
+        architecture: list[torch.nn.Sequential],
+        iters: int,
+        e_lr: float,
+        w_lr: float,
+        w_decay: float = 0.0,
+        output_loss = "mse",
+    ):
+        super().__init__(architecture, iters, e_lr, w_lr, w_decay, output_loss)
+
+    def y_pred(self, x: torch.Tensor):
+        s_i = (x, 0.0)  # activity, identity for skip connection
+        for e_i, layer_i in zip(self.errors + [0.0], self.layers):
+            s_i = layer_i(s_i)  # layers take care of writing s_i[1] and adding it to s_i[0]
+            s_i = (s_i[0] + e_i, s_i[1]) 
+        return s_i[0]
+    
+
+    def E_local(self, x, y):
+        E = 0.0
+        s_i = (x, 0.0)
+        for e_i, layer_i in zip(self.errors, self.layers[:-1]):
+            s_i_pred = layer_i(s_i)  # tracking the computational graph...
+            s_i = (e_i + s_i_pred[0]).detach()  # detach => no backprop!
+
+            E += 0.5 * F.mse_loss(s_i_pred[0], s_i, reduction="sum")
+            s_i = (s_i, s_i_pred[1]) 
+
+        y_pred = self.layers[-1](s_i)[0]
+        return E + self.class_loss(y_pred, y)

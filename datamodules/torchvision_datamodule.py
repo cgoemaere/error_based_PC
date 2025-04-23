@@ -19,9 +19,10 @@ class TorchvisionDataModule(LightningDataModule):
     def dataset_name(self):
         return self.dataset.__name__
 
-    def __init__(self, batch_size: int):
+    def __init__(self, batch_size: int, is_test: bool = False):
         super().__init__()
         self.batch_size = batch_size
+        self.is_test = is_test
 
         # Add batch size to known_shapes
         self.known_shapes = {
@@ -30,7 +31,8 @@ class TorchvisionDataModule(LightningDataModule):
 
     def setup(self, stage: str):
         transform = v2.Compose([v2.ToTensor(), *self.transforms])
-
+        eval_transform = v2.Compose([v2.ToTensor(), self.transforms[-1]])
+        
         if stage == "fit":
             train_set = self.dataset(
                 root="../data",
@@ -40,17 +42,36 @@ class TorchvisionDataModule(LightningDataModule):
             )
             self.num_classes = len(train_set.classes)
 
-            self.train_set, self.val_set = torch.utils.data.random_split(
-                train_set, [0.9, 0.1], generator=torch.Generator().manual_seed(42)
-            )
+            if not self.is_test:
+                train_indices, val_indices = torch.utils.data.random_split(
+                    range(len(train_set)), [0.95, 0.05], generator=torch.Generator().manual_seed(42)
+                )
+                self.train_set = torch.utils.data.Subset(train_set, train_indices)
+                self.val_set = torch.utils.data.Subset(
+                    self.dataset(
+                        root="../data",
+                        train=True,
+                        download=True,
+                        transform=eval_transform,
+                    ),
+                    val_indices,
+                )
+            else:
+                self.train_set = train_set
+                self.val_set = self.dataset(
+                    root="../data",
+                    train=False,
+                    download=True,
+                    transform=eval_transform,
+                )
 
         elif stage == "test" or stage == "predict":
             self.test_set = self.dataset(
-                root="../data",
-                train=False,
-                download=True,
-                transform=transform,
-            )
+                    root="../data",
+                    train=False,
+                    download=True,
+                    transform=eval_transform,
+                )
 
     def on_after_batch_transfer(self, batch, dataloader_idx):
         """
@@ -105,12 +126,19 @@ class TorchvisionDataModule(LightningDataModule):
         )
 
     def metrics(self, node_dict, batch, prefix: str = ""):
-        """Returns classification accuracy. Used at val/test time"""
+        """Returns classification accuracy (top-1 and top-5). Used at val/test time"""
         y = batch["y"]
         y_pred = node_dict["y"]
 
-        class_pred = y_pred.argmax(1, keepdim=True)
+        class_pred_top1 = y_pred.argmax(1, keepdim=True)
         class_target = y.argmax(1, keepdim=True)
-        accuracy = (class_pred == class_target).float().mean()
+        top1_accuracy = (class_pred_top1 == class_target).float().mean()
 
-        return {f"{prefix}acc": accuracy}
+        # Compute top-5 accuracy
+        top5_pred = y_pred.topk(5, dim=1).indices
+        top5_accuracy = (top5_pred == class_target.view(-1, 1)).any(dim=1).float().mean()
+
+        return {
+            f"{prefix}acc": top1_accuracy,
+            f"{prefix}acc_top5": top5_accuracy,
+        }

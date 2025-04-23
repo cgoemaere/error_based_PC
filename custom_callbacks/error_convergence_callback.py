@@ -18,11 +18,11 @@ class ErrorConvergenceCallback(Callback):
             # Calculate all grad ratios (in log10 space)
             error_grad_ratio = torch.stack(
                 tuple(map(ErrorConvergenceCallback.log10_grad_norm_ratio, errors)),
-            )  # shape = len(errors), batch_size
+            ).mean()  # shape = len(errors), batch_size
 
             # Track overall distribution of the grad ratio: what values does it take?
             trainer.logger.experiment.log(
-                {"Hist(log10_grad_ratio)": wandb.Histogram(error_grad_ratio.cpu())}
+                {"Hist(log10_grad_ratio)": (error_grad_ratio.cpu())}
             )
 
         # Track ||g||_\infty (i.e., the max grad component)
@@ -34,9 +34,9 @@ class ErrorConvergenceCallback(Callback):
         """Returns a batched version of the gradient norm ratio ||g_e||/||e||.
         This is basically the same as the relative residual in DEQs."""
         return (
-            vector_norm(error.grad.flatten(1), dim=1, ord=2)
-            / vector_norm(error.flatten(1), dim=1, ord=2)
-        ).log10()
+            vector_norm(error.grad.flatten(1), dim=1, ord=2) / (vector_norm(error.flatten(1), dim=1, ord=2) + 1e-8)
+        )
+        return torch.tensor([10.]) #
 
     ### Test time code ###
     # At inference, convergence is perfect, since a feedforward pass is the exact energy minimum
