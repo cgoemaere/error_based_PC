@@ -1,14 +1,11 @@
 import lightning
 import wandb
-from custom_callbacks import ErrorConvergenceCallback
 from datamodules import CIFAR10, CIFAR100, TinyImageNet
 from get_arch import get_architecture, get_cnn_architecture
 from lightning import Trainer
 from lightning.pytorch.loggers import WandbLogger
 from lightning.pytorch.callbacks import LearningRateMonitor
-from pc_e import PCE
-from torch import nn
-import torch
+from pc_s import PCS
 
 
 def train_model(logger, run_config):
@@ -31,7 +28,7 @@ def train_model(logger, run_config):
         accelerator="gpu",
         devices=1,
         logger=logger,
-        callbacks=[ErrorConvergenceCallback(), lr_monitor],
+        callbacks=[lr_monitor],
         max_epochs=run_config["nm_epochs"],
         inference_mode=False,  # inference_mode would interfere with the state backward pass
         limit_predict_batches=1,  # enable 1-batch prediction
@@ -43,7 +40,7 @@ def train_model(logger, run_config):
 
     # 4: Initiate model and train it
     datamodule.setup("fit")
-    pc = PCE(
+    pc = PCS(
         architecture,
         iters=run_config["iters"],
         e_lr=run_config["e_lr"],
@@ -67,18 +64,19 @@ def train_model(logger, run_config):
 
 if __name__ == "__main__":
     config = {
+        "type": "State",
         "seed": 42,
         "batch_size": 256,
         "nm_epochs": 50,
-        "iters": 5,
+        "iters": 8,
         "e_lr": 0.001,
-        "w_lr": 0.000662772765622318,
-        "w_decay": 0.0003639117865323884,
-        "output_loss": "ce",
+        "w_lr": 0.001,
+        "w_decay": 0.000,
+        "output_loss": "mse",
         "model": "VGG5",
         "act_fn": "gelu",
         "dataset": "CIFAR10",
-        "is_test": True,
+        "is_test": False,
     }
 
     wandb.init(project="ErrorPC", entity="oliviers-gaspard")

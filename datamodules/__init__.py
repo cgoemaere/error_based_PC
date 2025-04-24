@@ -116,23 +116,25 @@ class TinyImageNet(TorchvisionDataModule):
     def setup(self, stage: str):
         self.num_classes = 200
         transform = v2.Compose([v2.ToTensor(), *self.transforms])
+        eval_transform = v2.Compose([v2.ToTensor(), self.transforms[-1]])
+        
         if stage == "fit" or stage is None:
             ## standard way to load the dataset, takes no setup for 20min/epoch
-            # self.train_set = torchvision.datasets.ImageFolder(root = f"{self.data_dir}/train", transform=transform)
-            # self.val_set = TinyImageNetValDataset(root=f"{self.data_dir}/val", transform=transform)
+            self.train_set = torchvision.datasets.ImageFolder(root = f"{self.data_dir}/train", transform=transform)
+            self.val_set = TinyImageNetValDataset(root=f"{self.data_dir}/val", transform=transform)
 
-            # loads the entire dataset into cpu memory - takes about 128GB, takes 20 minutes at setup for 6/7min/epoch
-            train_set = torchvision.datasets.ImageFolder(root = f"{self.data_dir}/train", transform=transform)
-            val_set = TinyImageNetValDataset(root=f"{self.data_dir}/val", transform=transform)
-            train_cpu_dl = DataLoader(train_set, batch_size=train_set.__len__())
-            val_cpu_dl = DataLoader(val_set, batch_size=val_set.__len__())
+            # # loads the entire dataset into cpu memory - takes about 128GB, takes 20 minutes at setup for 6/7min/epoch
+            # train_set = torchvision.datasets.ImageFolder(root = f"{self.data_dir}/train", transform=transform)
+            # val_set = TinyImageNetValDataset(root=f"{self.data_dir}/val", transform=transform)
+            # train_cpu_dl = DataLoader(train_set, batch_size=train_set.__len__())
+            # val_cpu_dl = DataLoader(val_set, batch_size=val_set.__len__())
 
-            # make dataset with in memory data
-            train_cpu = next(iter(train_cpu_dl))
-            val_cpu = next(iter(val_cpu_dl))
+            # # make dataset with in memory data
+            # train_cpu = next(iter(train_cpu_dl))
+            # val_cpu = next(iter(val_cpu_dl))
 
-            self.train_set = TensorDataset(train_cpu[0], train_cpu[1])
-            self.val_set = TensorDataset(val_cpu[0], val_cpu[1])
+            # self.train_set = TensorDataset(train_cpu[0], train_cpu[1])
+            # self.val_set = TensorDataset(val_cpu[0], val_cpu[1])
         elif stage == "test":
             self.test_set = self.val_set
 

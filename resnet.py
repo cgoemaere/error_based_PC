@@ -6,7 +6,6 @@ from get_arch import get_resnet_architecture
 from lightning import Trainer
 from lightning.pytorch.loggers import WandbLogger
 from pc_e import PCESkipConnection
-from torch import nn
 
 def train_model(logger, run_config):
     # Make sure to always generate the *exact* same datasets & batches
@@ -14,7 +13,12 @@ def train_model(logger, run_config):
 
     # 1: load dataset as Lightning DataModule
     batch_size = run_config["batch_size"]
-    datamodule = TinyImageNet(batch_size)
+    if run_config["dataset"] == "CIFAR10":
+        datamodule = CIFAR10(batch_size, is_test=run_config["is_test"])
+    elif run_config["dataset"] == "CIFAR100":
+        datamodule = CIFAR100(batch_size, is_test=run_config["is_test"])
+    elif run_config["dataset"] == "tiny-imagenet":
+        datamodule = TinyImageNet(batch_size, is_test=run_config["is_test"])
     print("Training on", datamodule.dataset_name)
 
     # 2: Set up Lightning trainer
@@ -33,6 +37,7 @@ def train_model(logger, run_config):
     architecture = get_resnet_architecture(run_config["model"], datamodule.dataset_name)
 
     # 4: Initiate model and train it
+    datamodule.setup("fit")
     pc = PCESkipConnection(
         architecture,
         iters=run_config["iters"],
@@ -40,6 +45,8 @@ def train_model(logger, run_config):
         w_lr=run_config["w_lr"],
         w_decay=run_config["w_decay"],
         output_loss=run_config["output_loss"],
+        nm_batches=len(datamodule.train_dataloader()),
+        nm_epochs=run_config["nm_epochs"],
     )
     trainer.fit(pc, datamodule=datamodule)
 
@@ -64,6 +71,8 @@ if __name__ == "__main__":
         "w_decay": 0.0,
         "output_loss": "mse",
         "model": "ResNet18",
+        "dataset": "CIFAR10",
+        "is_test": False,
     }
 
     wandb.init(project="ErrorPC", entity="oliviers-gaspard")
