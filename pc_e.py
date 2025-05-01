@@ -6,6 +6,8 @@ from lightning import LightningModule
 from torch.optim.lr_scheduler import LambdaLR
 import math
 
+from utils import AdamW
+
 class PCE(LightningModule):
     def __init__(
         self,
@@ -38,10 +40,10 @@ class PCE(LightningModule):
         elif output_loss == "ce":
             self.output_loss = torch.nn.CrossEntropyLoss(reduction="sum")
 
-        self.nm_batches = nm_batches
+        self.nm_batches = nm_batches 
         self.nm_epochs = nm_epochs
 
-        self.weight_loss_scaling = min([1.0, e_lr * iters]) # to avoid tiny errors from inference
+        self.energy_scale = min([1.0, e_lr * iters]) # to avoid tiny errors from inference
 
     def y_pred(self, x: torch.Tensor):
         s_i = x
@@ -172,7 +174,7 @@ class PCE(LightningModule):
         self.log("E_local", E_final, prog_bar=True)
 
         # For weight optimization, we must average E over the batch.
-        return E_final / (self.batch_size * self.weight_loss_scaling)  # = loss function for Lightning to minimize wrt params
+        return E_final / (self.batch_size * self.energy_scale)  # = loss function for Lightning to minimize wrt params
 
     def validation_step(self, batch: dict[str, torch.Tensor], batch_idx):
         self.forward(x=batch["img"])

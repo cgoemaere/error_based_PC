@@ -69,11 +69,11 @@ if __name__ == "__main__":
     config = {
         "seed": 42,
         "batch_size": 256,
-        "nm_epochs": 50,
+        "nm_epochs": 25,
         "iters": 5,
         "e_lr": 0.001,
         "w_lr": 0.000662772765622318,
-        "w_decay": 0.0003639117865323884,
+        "w_decay": 0.00003639117865323884,
         "output_loss": "ce",
         "model": "VGG5",
         "act_fn": "gelu",

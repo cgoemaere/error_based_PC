@@ -46,6 +46,7 @@ def train_model(logger, run_config):
         e_lr=run_config["e_lr"],
         w_lr=run_config["w_lr"],
         w_decay=run_config["w_decay"],
+        e_momentum=run_config["e_momentum"],
         output_loss=run_config["output_loss"],
         nm_batches=len(datamodule.train_dataloader()),
         nm_epochs=run_config["nm_epochs"],
@@ -66,17 +67,18 @@ if __name__ == "__main__":
     config = {
         "type": "State",
         "seed": 42,
-        "batch_size": 256,
+        "batch_size": 128,
         "nm_epochs": 50,
         "iters": 8,
-        "e_lr": 0.001,
-        "w_lr": 0.001,
-        "w_decay": 0.000,
-        "output_loss": "mse",
+        "e_lr": 0.014708110891388754,
+        "e_momentum": 0.0,
+        "w_lr": 0.0002641020393177285,
+        "w_decay": 1.2107509557065504e-05,
+        "output_loss": "ce",
         "model": "VGG5",
         "act_fn": "gelu",
         "dataset": "CIFAR10",
-        "is_test": False,
+        "is_test": True,
     }
 
     wandb.init(project="ErrorPC", entity="oliviers-gaspard")

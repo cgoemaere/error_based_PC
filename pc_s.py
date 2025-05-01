@@ -6,6 +6,7 @@ from lightning import LightningModule
 from torch.optim.lr_scheduler import LambdaLR
 import math
 
+from utils import AdamW
 
 class PCS(LightningModule):
     def __init__(
@@ -15,6 +16,7 @@ class PCS(LightningModule):
         e_lr: float,
         w_lr: float,
         w_decay: float = 0.0,
+        e_momentum: Optional[float] = None,
         output_loss = "mse",
         nm_batches=None,
         nm_epochs=None,
@@ -31,12 +33,14 @@ class PCS(LightningModule):
         self.e_lr = e_lr
         self.w_lr = w_lr
         self.w_decay = w_decay
+        self.e_momentum = e_momentum
 
         if output_loss == "mse":
             mse = torch.nn.MSELoss(reduction="sum")
             self.output_loss = lambda y_pred, y: 0.5 * mse(y_pred, y)
         elif output_loss == "ce":
-            self.output_loss = torch.nn.CrossEntropyLoss(reduction="sum")
+            # self.output_loss = torch.nn.CrossEntropyLoss(reduction="sum")
+            self.output_loss = lambda y_pred, y: - (y * F.log_softmax(y_pred, dim=-1)).sum()
 
         self.nm_batches = nm_batches
         self.nm_epochs = nm_epochs
@@ -56,7 +60,7 @@ class PCS(LightningModule):
         total_steps = self.nm_batches * self.nm_epochs
         warmup_steps = int(0.1 * total_steps)
 
-        optimizer = torch.optim.Adam(self.layers.parameters(), lr=1.0, weight_decay=self.w_decay)
+        optimizer = torch.optim.Adam(self.layers.parameters(), lr=1.0, weight_decay=self.w_decay, decoupled_weight_decay=True)
 
         def lr_lambda(current_step):
             if current_step < warmup_steps:
@@ -78,7 +82,7 @@ class PCS(LightningModule):
                 "frequency": 1
             }
         }
-        return torch.optim.Adam(self.layers.parameters(), lr=self.w_lr, weight_decay=self.w_decay)
+        # return torch.optim.Adam(self.layers.parameters(), lr=self.w_lr, weight_decay=self.w_decay)
 
     def y_pred(self, x: torch.Tensor):
         for layer_i in self.layers:
@@ -112,7 +116,7 @@ class PCS(LightningModule):
         states = ff_init(x)
 
         # Minimize energy via the states
-        state_optim = torch.optim.SGD(states, lr=s_lr)
+        state_optim = torch.optim.SGD(states, lr=s_lr, momentum=self.e_momentum)
         for _ in range(iters):
             state_optim.zero_grad()
             E = self.E_states_only(x, y, states)
