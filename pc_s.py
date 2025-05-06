@@ -188,12 +188,13 @@ class PCSSkipConnection(PCS):
         e_lr: float,
         w_lr: float,
         w_decay: float = 0.0,
+        e_momentum: Optional[float] = None,
         output_loss = "mse",
         nm_batches=None,
         nm_epochs=None,
 
     ):
-        super().__init__(architecture, iters, e_lr, w_lr, w_decay, output_loss, nm_batches, nm_epochs)
+        super().__init__(architecture, iters, e_lr, w_lr, w_decay, e_momentum, output_loss, nm_batches, nm_epochs)
 
     def y_pred(self, x: torch.Tensor):
         s_i = (x, 0.0)  # activity, identity for skip connection

@@ -54,8 +54,8 @@ class CIFAR100(TorchvisionDataModule):
         v2.Normalize(mean=[0.5071, 0.4867, 0.4408], std=[0.2675, 0.2565, 0.2761]),
     ]
     dataset = torchvision.datasets.CIFAR100
-    dl_kwargs = {"num_workers": 0, "pin_memory": False, "persistent_workers": False}
-    # dl_kwargs = {"num_workers": 7, "pin_memory": True, "persistent_workers": True}
+    # dl_kwargs = {"num_workers": 0, "pin_memory": False, "persistent_workers": False}
+    dl_kwargs = {"num_workers": 8, "pin_memory": True, "persistent_workers": True}
 
 
 import os
