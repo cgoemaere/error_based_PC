@@ -71,8 +71,8 @@ if __name__ == "__main__":
         "is_test": False,
     }
 
-    wandb.init(project="ErrorPC", entity="oliviers-gaspard")
-    logger = WandbLogger(project="ErrorPC", entity="oliviers-gaspard", mode="online")
+    wandb.init(project="ErrorPC" )
+    logger = WandbLogger(project="ErrorPC" , mode="online")
     logger_config = logger.experiment.config
 
     # overwrite config with logger config if it exists

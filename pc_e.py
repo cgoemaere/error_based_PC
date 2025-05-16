@@ -6,8 +6,6 @@ from lightning import LightningModule
 from torch.optim.lr_scheduler import LambdaLR
 import math
 
-from utils import AdamW
-
 class PCE(LightningModule):
     def __init__(
         self,

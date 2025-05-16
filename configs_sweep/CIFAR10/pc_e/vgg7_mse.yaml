@@ -1,0 +1,49 @@
+program: vgg_pce.py
+project: errorPC
+name: vgg7_mse
+method: bayes
+
+metric:
+  goal: maximize
+  name: val_acc
+
+parameters:
+  seed:
+    values: [42]
+  batch_size:
+    values: [256]
+  nm_epochs:
+    values: [25]
+  iters:
+    values: [5]
+  e_lr:
+    values: [0.001]
+  w_lr:
+    distribution: log_uniform_values
+    min: 0.00001
+    max: 0.01
+  w_decay:
+    distribution: log_uniform_values
+    min: 0.000001
+    max: 0.001
+  output_loss:
+    values: ["mse"]  
+  model:
+    values: ["VGG7"]
+  dataset:
+    values: ["CIFAR10"]
+  act_fn:
+    values: ["relu", "tanh", "leaky_relu", "gelu"]
+  is_test:
+    values: [0] # False
+
+
+early_terminate:
+  type: hyperband
+  min_iter: 100
+
+
+command:
+- ${env}
+- ${interpreter}
+- ${program}

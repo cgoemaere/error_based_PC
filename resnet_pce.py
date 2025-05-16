@@ -1,10 +1,11 @@
 import lightning
 import wandb
+from custom_callbacks import ErrorConvergenceCallback
 from datamodules import CIFAR100, CIFAR10, TinyImageNet
 from get_arch import get_resnet_architecture
 from lightning import Trainer
 from lightning.pytorch.loggers import WandbLogger
-from pc_s import PCSSkipConnection
+from pc_e import PCESkipConnection
 
 def train_model(logger, run_config):
     # Make sure to always generate the *exact* same datasets & batches
@@ -25,7 +26,7 @@ def train_model(logger, run_config):
         accelerator="gpu",
         devices=1,
         logger=logger,
-        callbacks=[],
+        callbacks=[ErrorConvergenceCallback()],
         max_epochs=run_config["nm_epochs"],
         inference_mode=False,  # inference_mode would interfere with the state backward pass
         limit_predict_batches=1,  # enable 1-batch prediction
@@ -37,13 +38,12 @@ def train_model(logger, run_config):
 
     # 4: Initiate model and train it
     datamodule.setup("fit")
-    pc = PCSSkipConnection(
+    pc = PCESkipConnection(
         architecture,
         iters=run_config["iters"],
-        s_lr=run_config["s_lr"],
+        e_lr=run_config["e_lr"],
         w_lr=run_config["w_lr"],
         w_decay=run_config["w_decay"],
-        s_momentum=run_config["s_momentum"],
         output_loss=run_config["output_loss"],
         nm_batches=len(datamodule.train_dataloader()),
         nm_epochs=run_config["nm_epochs"],
@@ -62,16 +62,14 @@ def train_model(logger, run_config):
 
 if __name__ == "__main__":
     config = {
-        "type": "State",
         "seed": 42,
         "batch_size": 256,
         "nm_epochs": 50,
-        "iters": 12,
-        "s_lr": 0.01,
-        "s_momentum": 0.9,
+        "iters": 5,
+        "e_lr": 0.001,
         "w_lr": 0.0001,
         "w_decay": 0.0,
-        "output_loss": "ce",
+        "output_loss": "mse",
         "model": "ResNet18",
         "dataset": "CIFAR10",
         "is_test": False,

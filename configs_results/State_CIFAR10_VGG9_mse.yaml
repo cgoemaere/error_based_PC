@@ -1,0 +1,61 @@
+program: vgg_pcs.py
+project: errorpc_results
+name: State_CIFAR10_VGG9_mse
+method: grid
+metric:
+  goal: maximize
+  name: val_acc
+parameters:
+  id:
+    values:
+    - State_CIFAR10_VGG9_mse
+  seed:
+    values:
+    - 42
+    - 0
+    - 1
+    - 2
+    - 3
+  batch_size:
+    values:
+    - 256
+  nm_epochs:
+    values:
+    - 25
+  iters:
+    values:
+    - 12
+  s_lr:
+    values:
+    - 0.0173315952847592
+  s_momentum:
+    values:
+    - 0.5
+  w_lr:
+    values:
+    - 5.774652615608541e-05
+  w_decay:
+    values:
+    - 0.0006489452463951
+  output_loss:
+    values:
+    - mse
+  model:
+    values:
+    - VGG9
+  dataset:
+    values:
+    - CIFAR10
+  act_fn:
+    values:
+    - tanh
+  is_test:
+    values:
+    - 1
+  type:
+    values:
+    - State
+command:
+- ${env}
+- ${interpreter}
+- ${program}

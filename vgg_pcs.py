@@ -43,10 +43,10 @@ def train_model(logger, run_config):
     pc = PCS(
         architecture,
         iters=run_config["iters"],
-        e_lr=run_config["e_lr"],
+        s_lr=run_config["s_lr"],
         w_lr=run_config["w_lr"],
         w_decay=run_config["w_decay"],
-        e_momentum=run_config["e_momentum"],
+        s_momentum=run_config["s_momentum"],
         output_loss=run_config["output_loss"],
         nm_batches=len(datamodule.train_dataloader()),
         nm_epochs=run_config["nm_epochs"],
@@ -70,8 +70,8 @@ if __name__ == "__main__":
         "batch_size": 128,
         "nm_epochs": 50,
         "iters": 8,
-        "e_lr": 0.014708110891388754,
-        "e_momentum": 0.0,
+        "s_lr": 0.014708110891388754,
+        "s_momentum": 0.0,
         "w_lr": 0.0002641020393177285,
         "w_decay": 1.2107509557065504e-05,
         "output_loss": "ce",
@@ -81,8 +81,8 @@ if __name__ == "__main__":
         "is_test": True,
     }
 
-    wandb.init(project="ErrorPC", entity="oliviers-gaspard")
-    logger = WandbLogger(project="ErrorPC", entity="oliviers-gaspard", mode="online")
+    wandb.init(project="ErrorPC")
+    logger = WandbLogger(project="ErrorPC", mode="online")
     logger_config = logger.experiment.config
 
     # overwrite config with logger config if it exists

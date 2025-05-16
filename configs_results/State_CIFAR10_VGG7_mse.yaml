@@ -1,0 +1,61 @@
+program: vgg_pcs.py
+project: errorpc_results
+name: State_CIFAR10_VGG7_mse
+method: grid
+metric:
+  goal: maximize
+  name: val_acc
+parameters:
+  id:
+    values:
+    - State_CIFAR10_VGG7_mse
+  seed:
+    values:
+    - 42
+    - 0
+    - 1
+    - 2
+    - 3
+  batch_size:
+    values:
+    - 256
+  nm_epochs:
+    values:
+    - 25
+  iters:
+    values:
+    - 10
+  s_lr:
+    values:
+    - 0.0022786426524005
+  s_momentum:
+    values:
+    - 0.05
+  w_lr:
+    values:
+    - 0.0020723348212549
+  w_decay:
+    values:
+    - 3.0980029886592462e-06
+  output_loss:
+    values:
+    - mse
+  model:
+    values:
+    - VGG7
+  dataset:
+    values:
+    - CIFAR10
+  act_fn:
+    values:
+    - gelu
+  is_test:
+    values:
+    - 1
+  type:
+    values:
+    - State
+command:
+- ${env}
+- ${interpreter}
+- ${program}

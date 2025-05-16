@@ -1,0 +1,61 @@
+program: vgg_bp.py
+project: errorpc_results
+name: BP_CIFAR100_VGG7_ce
+method: grid
+metric:
+  goal: maximize
+  name: val_acc
+parameters:
+  id:
+    values:
+    - BP_CIFAR100_VGG7_ce
+  seed:
+    values:
+    - 42
+    - 0
+    - 1
+    - 2
+    - 3
+  batch_size:
+    values:
+    - 256
+  nm_epochs:
+    values:
+    - 25
+  iters:
+    values:
+    - 0
+  e_lr:
+    values:
+    - 0
+  e_momentum:
+    values:
+    - 0
+  w_lr:
+    values:
+    - 0.0013844575181948
+  w_decay:
+    values:
+    - 0.0004130805101909
+  output_loss:
+    values:
+    - ce
+  model:
+    values:
+    - VGG7
+  dataset:
+    values:
+    - CIFAR100
+  act_fn:
+    values:
+    - gelu
+  is_test:
+    values:
+    - 1
+  type:
+    values:
+    - BP
+command:
+- ${env}
+- ${interpreter}
+- ${program}

@@ -1,0 +1,61 @@
+program: vgg_pce.py
+project: errorpc_results
+name: Error_CIFAR10_VGG9_ce
+method: grid
+metric:
+  goal: maximize
+  name: val_acc
+parameters:
+  id:
+    values:
+    - Error_CIFAR10_VGG9_ce
+  seed:
+    values:
+    - 42
+    - 0
+    - 1
+    - 2
+    - 3
+  batch_size:
+    values:
+    - 256
+  nm_epochs:
+    values:
+    - 25
+  iters:
+    values:
+    - 5
+  e_lr:
+    values:
+    - 0.001
+  e_momentum:
+    values:
+    - 0
+  w_lr:
+    values:
+    - 0.0005360873079235
+  w_decay:
+    values:
+    - 0.0006875514773115
+  output_loss:
+    values:
+    - ce
+  model:
+    values:
+    - VGG9
+  dataset:
+    values:
+    - CIFAR10
+  act_fn:
+    values:
+    - tanh
+  is_test:
+    values:
+    - 1
+  type:
+    values:
+    - Error
+command:
+- ${env}
+- ${interpreter}
+- ${program}

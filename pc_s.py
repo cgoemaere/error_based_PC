@@ -6,17 +6,15 @@ from lightning import LightningModule
 from torch.optim.lr_scheduler import LambdaLR
 import math
 
-from utils import AdamW
-
 class PCS(LightningModule):
     def __init__(
         self,
         architecture: list[torch.nn.Sequential],
         iters: int,
-        e_lr: float,
+        s_lr: float,
         w_lr: float,
         w_decay: float = 0.0,
-        e_momentum: Optional[float] = None,
+        s_momentum: Optional[float] = None,
         output_loss = "mse",
         nm_batches=None,
         nm_epochs=None,
@@ -30,10 +28,10 @@ class PCS(LightningModule):
         self.layers = torch.nn.ModuleList(architecture)
 
         self.iters = iters
-        self.e_lr = e_lr
+        self.s_lr = s_lr
         self.w_lr = w_lr
         self.w_decay = w_decay
-        self.e_momentum = e_momentum
+        self.s_momentum = s_momentum
 
         if output_loss == "mse":
             mse = torch.nn.MSELoss(reduction="sum")
@@ -53,9 +51,9 @@ class PCS(LightningModule):
         return self.output_loss(y_pred, y)
 
     def configure_optimizers(self):
-        base_lr = self.w_lr
-        peak_lr = 1.1 * base_lr
-        end_lr = 0.1 * base_lr
+        bass_lr = self.w_lr
+        peak_lr = 1.1 * bass_lr
+        end_lr = 0.1 * bass_lr
 
         total_steps = self.nm_batches * self.nm_epochs
         warmup_steps = int(0.1 * total_steps)
@@ -64,8 +62,8 @@ class PCS(LightningModule):
 
         def lr_lambda(current_step):
             if current_step < warmup_steps:
-                # Linear warmup from base_lr to peak_lr
-                return base_lr + (peak_lr - base_lr) * (current_step / warmup_steps)
+                # Linear warmup from bass_lr to peak_lr
+                return bass_lr + (peak_lr - bass_lr) * (current_step / warmup_steps)
             else:
                 # Cosine decay from peak_lr to end_lr
                 progress = (current_step - warmup_steps) / max(1, total_steps - warmup_steps)
@@ -116,7 +114,7 @@ class PCS(LightningModule):
         states = ff_init(x)
 
         # Minimize energy via the states
-        state_optim = torch.optim.SGD(states, lr=s_lr, momentum=self.e_momentum)
+        state_optim = torch.optim.SGD(states, lr=s_lr, momentum=self.s_momentum)
         for _ in range(iters):
             state_optim.zero_grad()
             E = self.E_states_only(x, y, states)
@@ -140,7 +138,7 @@ class PCS(LightningModule):
             x=batch["img"],
             y=batch["y"],
             iters=self.iters,
-            s_lr=self.e_lr,
+            s_lr=self.s_lr,
         )
 
         E_final = self.E_states_only(
@@ -185,16 +183,16 @@ class PCSSkipConnection(PCS):
         self,
         architecture: list[torch.nn.Sequential],
         iters: int,
-        e_lr: float,
+        s_lr: float,
         w_lr: float,
         w_decay: float = 0.0,
-        e_momentum: Optional[float] = None,
+        s_momentum: Optional[float] = None,
         output_loss = "mse",
         nm_batches=None,
         nm_epochs=None,
 
     ):
-        super().__init__(architecture, iters, e_lr, w_lr, w_decay, e_momentum, output_loss, nm_batches, nm_epochs)
+        super().__init__(architecture, iters, s_lr, w_lr, w_decay, s_momentum, output_loss, nm_batches, nm_epochs)
 
     def y_pred(self, x: torch.Tensor):
         s_i = (x, 0.0)  # activity, identity for skip connection
