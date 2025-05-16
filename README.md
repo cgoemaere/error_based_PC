@@ -1,9 +1,8 @@
 ## Installation
 
 Install the required packages:
-    ```
+
     pip install -r requirements.txt
-    ```
 
 ## Running with WANDB Sweeps
 
@@ -24,8 +23,19 @@ Create a sweep using a configuration file. All configuration files for the hyper
 3. **Run the Sweep Agent:**  
     Start one or more agents to run the experiments:
     ```
-    wandb agent <Sweep_ID>
+    wandb agent <User_Name>/<Project_Name>/<Sweep_ID>
     ```
+    From the config files, <Project_Name> is errorPC for sweeps and errorpc_results for running tuned models.
 
 Replace `<Sweep_ID>` with the Sweep ID received from the previous step.
 This will start the hyperparameter tuning or run a model for 5 seeds.
+
+
+**Example:**
+    
+    wandb login
+
+    wandb sweep configs_results/Error_CIFAR10_VGG5_mse.yaml
+
+    wandb agent <User_Name>/errorpc_results/<Sweep_ID>
+    
