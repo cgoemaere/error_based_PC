@@ -14,6 +14,7 @@ Install the required packages:
     ```
 
 Create a sweep using a configuration file. All configuration files for the hyperparameter sweep can be found as `configs_sweeps/`. All the configuration files for the models with optimised parameters can be found at `configs_results/`. To start running models you can:
+
 2. **Initialize a Sweep:**  
     ```
     wandb sweep sweep_config.yaml
