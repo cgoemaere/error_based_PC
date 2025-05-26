@@ -6,8 +6,6 @@ checkpoints/*
 
 # WANDB
 **/wandb/*
-**/PredictiveCoding/*
-**/BiPC/*
 
 
 # EXTENSIONS

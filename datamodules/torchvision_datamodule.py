@@ -5,6 +5,13 @@ from custom_callbacks import ImageLabelVisualizationCallback
 from lightning import LightningDataModule
 from torch.utils.data import DataLoader
 
+FINAL_TRAINING_RUN = False
+
+
+def set_FINAL_TRAINING_RUN(value: bool):
+    global FINAL_TRAINING_RUN
+    FINAL_TRAINING_RUN = value
+
 
 class TorchvisionDataModule(LightningDataModule):
     """Abstract class to easily turn a torchvision dataset into a Lightning DataModule"""
@@ -13,6 +20,7 @@ class TorchvisionDataModule(LightningDataModule):
     known_shapes: dict[str, tuple[int, ...]]
     transforms: list[v2.Transform]
     dataset: type = torchvision.datasets.VisionDataset
+    train_transforms: list[v2.Transform] = []
     dl_kwargs: dict = {}
 
     @property
@@ -29,27 +37,29 @@ class TorchvisionDataModule(LightningDataModule):
         }
 
     def setup(self, stage: str):
-        transform = v2.Compose([v2.ToTensor(), *self.transforms])
-
         if stage == "fit":
             train_set = self.dataset(
                 root="../data",
                 train=True,
                 download=True,
-                transform=transform,
+                transform=v2.Compose([*self.transforms, *self.train_transforms]),
             )
             self.num_classes = len(train_set.classes)
 
-            self.train_set, self.val_set = torch.utils.data.random_split(
-                train_set, [0.9, 0.1], generator=torch.Generator().manual_seed(42)
-            )
+            if FINAL_TRAINING_RUN:
+                self.train_set = train_set
+                self.val_set = None
+            else:
+                self.train_set, self.val_set = torch.utils.data.random_split(
+                    train_set, [0.9, 0.1], generator=torch.Generator().manual_seed(42)
+                )
 
         elif stage == "test" or stage == "predict":
             self.test_set = self.dataset(
                 root="../data",
                 train=False,
                 download=True,
-                transform=transform,
+                transform=v2.Compose(self.transforms),
             )
 
     def on_after_batch_transfer(self, batch, dataloader_idx):
@@ -78,12 +88,16 @@ class TorchvisionDataModule(LightningDataModule):
         )
 
     def val_dataloader(self):
-        return DataLoader(
-            self.val_set,
-            batch_size=self.batch_size,
-            shuffle=False,
-            drop_last=True,
-            **self.dl_kwargs,
+        return (
+            DataLoader(
+                self.val_set,
+                batch_size=self.batch_size,
+                shuffle=False,
+                drop_last=True,
+                **self.dl_kwargs,
+            )
+            if not FINAL_TRAINING_RUN
+            else []  # Empty validation set
         )
 
     def test_dataloader(self):

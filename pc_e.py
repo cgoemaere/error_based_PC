@@ -157,12 +157,20 @@ class PCE(LightningModule):
     # Below, we define PC in its regular, state-based formulation.
     # This is only for comparison to the error-based formulation above.
 
+    def get_states_from_errors(self, x: torch.Tensor):
+        """Returns the states corresponding to the errors, including y_pred"""
+        return [(x := e_i + layer_i(x)) for e_i, layer_i in zip(self.errors + [0.0], self.layers)]
+
     def E_states_only(self, x: torch.Tensor, y: torch.Tensor, states: list[torch.Tensor]):
         """
         Calculates the energy using only the states, which need to be given as inputs.
         No errors are used here.
         """
-        losses = [torch.nn.MSELoss(reduction="sum")] * len(states) + [self.class_loss]
+
+        def half_mse_loss(y_pred, y):
+            return 0.5 * F.mse_loss(y_pred, y, reduction="sum")
+
+        losses = [half_mse_loss] * len(states) + [self.class_loss]
         states = [x] + states + [y]
 
         return sum(

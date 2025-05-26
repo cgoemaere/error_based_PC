@@ -14,10 +14,6 @@ class CompareWithStateOptimization(PCE):
         # Disable all intermediary logging
         return None
 
-    def get_states_from_errors(self, x: torch.Tensor):
-        """Returns the states corresponding to the errors, including y_pred"""
-        return [(x := e_i + layer_i(x)) for e_i, layer_i in zip(self.errors + [0.0], self.layers)]
-
     @staticmethod
     def relative_state_comparison(s1, s2):
         return (
