@@ -1,17 +1,16 @@
 
 # Error Optimization for Predictive Coding
+
 _Official codebase for "**Error Optimization: Overcoming Exponential Signal Decay in Deep Predictive Coding Networks**"_ [[arXiv]](https://arxiv.org/abs/2505.20137)
 
-_In addition to reproducing all our experiments (figures included), this repo is designed as a modular, extensible framework for PC research using [PyTorch Lightning](https://github.com/Lightning-AI/pytorch-lightning) + [wandb](https://github.com/wandb/wandb)._
+[![arXiv](https://img.shields.io/badge/arXiv-2505.20137-b31b1b.svg)](https://arxiv.org/abs/2505.20137)
+[![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/downloads/)
+[![PyTorch Lightning](https://img.shields.io/badge/pytorch-lightning-purple.svg?logo=PyTorch%20Lightning)](https://github.com/Lightning-AI/pytorch-lightning)
+[![wandb](https://raw.githubusercontent.com/wandb/assets/main/wandb-github-badge-gradient.svg)](https://github.com/wandb/wandb)
 
-## 💡 The idea behind Error Optimization
-**Predictive Coding (PC)** is a biologically-plausible alternative to backpropagation, but struggles to scale to deeper architectures. In our paper, we uncover **the fundamental bottleneck: exponential signal decay** that gets worse with depth.
+---
 
-We introduce **Error Optimization (EO)**, a novel reparameterization of PC that optimizes over errors rather than states, enabling global signal propagation without attenuation. As a result, EO scales well to deep neural nets, matching the accuracy of backpropagation, while converging 100-1000x faster than traditional PC.
-
-**Finally, Predictive Coding that scales to deep networks** 🚀
-
-## 👉 Why you should _definitely_ use Error Optimization
+## 👉 What Error Optimization can do for you
 
 On digital hardware, traditional Predictive Coding hits a wall with deep networks due to exponential signal decay.  
 Error Optimization fixes that:
