@@ -1,7 +1,7 @@
 
-# Error Optimization for Predictive Coding
+# ePC: a Predictive Coding algorithm that scales
 
-_Official codebase for "**Error Optimization: Overcoming Exponential Signal Decay in Deep Predictive Coding Networks**"_ [[arXiv]](https://arxiv.org/abs/2505.20137)
+_Official codebase for "**ePC: Overcoming Exponential Signal Decay in Deep Predictive Coding Networks**"_ [[arXiv]](https://arxiv.org/abs/2505.20137)
 
 [![arXiv](https://img.shields.io/badge/arXiv-2505.20137-b31b1b.svg)](https://arxiv.org/abs/2505.20137)
 [![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/downloads/)
@@ -10,37 +10,39 @@ _Official codebase for "**Error Optimization: Overcoming Exponential Signal Deca
 
 ---
 
-## 👉 What Error Optimization can do for you
+## 👉 What ePC can do for you
 
-On digital hardware, traditional Predictive Coding hits a wall with deep networks due to exponential signal decay.  
-Error Optimization fixes that:
+On digital hardware, traditional state-based Predictive Coding (sPC) suffers from extreme signal decay.  
+This is why it doesn't work well for deep networks (5+ layers).
 
-| Traditional state-based PC | Error Optimization |
+Error-based PC fixes that:
+
+| State-based PC | Error-based PC |
 |---|---|
 | 🚫 Struggles with depth (4-5 layers max) | ✅ **Scales to any depth you want** |
 | 🐌 Slow convergence (thousands of iterations) | ⚡ **100-1000x faster convergence** |
 | 📉 Poor performance on deep networks | 🎯 **Matches backprop performance** |
-| 📃 Energy optimization, local weight updates | 📋 **Preserves PC's key properties** |
+| 📃 Energy minimization, local weight updates | 📋 **Verified 100% still PC** |
 | 🧠 Meant for neuromorphic hardware | 🖥️ **Designed for GPUs** |
 
-**Bottom line**: If you're working with Predictive Coding on digital hardware, Error Optimization is what you need.
+**Bottom line**: If you're working with Predictive Coding on digital hardware, ePC is what you need. Using sPC *will* lead to incorrect conclusions!
 
 ## ⚡ Quickstart
 
 1.  **Install dependencies via Conda**
 	```bash
 	# Clone and setup (2 minutes)
-	git clone https://github.com/cgoemaere/pc_error_optimization
-	cd pc_error_optimization/
-	conda create --name error_optim_test_env --file requirements.txt -c conda-forge -c pytorch
-	conda activate error_optim_test_env
+	git clone https://github.com/cgoemaere/error_based_PC
+	cd error_based_PC/
+	conda create --name ePC_test_env --file requirements.txt -c conda-forge -c pytorch
+	conda activate ePC_test_env
 
 	# Sanity check
 	python3 -c "from pc_e import PCE; print('Installation successful!')"
 	```
 
 2.  **Play around with the interactive notebook**  
-Launch `PredictiveCodingPlayground.ipynb`  in Jupyter for hands-on experimentation with PC and EO.
+Launch `PredictiveCodingPlayground.ipynb`  in Jupyter for hands-on experimentation with sPC and ePC.
 
 ## 📂 Repository structure
 
@@ -52,7 +54,7 @@ Launch `PredictiveCodingPlayground.ipynb`  in Jupyter for hands-on experimentati
 ├── datamodules/           # PyTorch Lightning datamodules (datasets, augmentations)
 ├── get_arch.py            # Model architectures
 ├── pc_e.py                # Core PC formulation
-└── get_variants.py        # All loss/optimization variants (SO, EO, BP)
+└── get_variants.py        # All loss/optimization variants (sPC, ePC, BP)
 
 > cifar branch             # Same as above, for CIFAR-10/100 (with VGG/ResNet)
 ├── configs_results/       # YAML files with final training configurations
@@ -62,6 +64,9 @@ Launch `PredictiveCodingPlayground.ipynb`  in Jupyter for hands-on experimentati
 ```
 
 ## 📊 Reproducing our results
+
+> [!IMPORTANT]  
+> For historical reasons, the codebase uses `SO` for sPC and `EO` for ePC (from earlier names "State Optimization" and "Error Optimization"). These names were preserved to maintain code stability.
 
 - **Reproduce MNIST/FashionMNIST experiments**
 	```bash
@@ -84,14 +89,15 @@ Launch `PredictiveCodingPlayground.ipynb`  in Jupyter for hands-on experimentati
        },
 	}
 	```
-	_(see Appendix D for all hyperparameter settings used in our experiments)_
+	_(see Appendix E for all hyperparameter settings used in our experiments)_
 
 - 	 **Reproduce MNIST figures**
 	See `mnist_poc` folder:
 		- Fig. 1: `fig1.ipynb`
 		- Fig. B.1: `fig1_float64_binomial.ipynb`
 		- Fig. 5: `analysis_deep_linear.ipynb`
-		- Fig. C.1: `analysis_deep_MLP.ipynb`
+		- Fig. C.1: `analysis_deep_linear.ipynb`
+		- Fig. D.1: `analysis_deep_MLP.ipynb`
 	
 
 -  **Reproduce CIFAR-10/100 experiments**
@@ -106,8 +112,8 @@ _All experiment configs, logging, and results generation go directly to wandb._
 
 If our work helps your research, please cite:
 ```bibTeX
-@article{goemaere2025error_optim,
-	title = {Error Optimization: Overcoming Exponential Signal Decay in Deep Predictive Coding Networks},
+@article{goemaere2025ePC,
+	title = {ePC: Overcoming Exponential Signal Decay in Deep Predictive Coding Networks},
 	author = {C\'edric Goemaere and Gaspard Oliviers and Rafal Bogacz and Thomas Demeester},
 	year = {2025},
 	journal = {arXiv preprint arXiv: 2505.20137}
