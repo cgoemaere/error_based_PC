@@ -1,12 +1,14 @@
 
 # Error Optimization for Predictive Coding
 
-_Official codebase for "**Error Optimization: Overcoming Exponential Signal Decay in Deep Predictive Coding Networks**"_ [[arXiv]](https://arxiv.org/abs/2505.20137)
+_Official codebase for "**Error Optimization: Overcoming Exponential Signal Decay in Deep Predictive Coding Networks**"_ [[arXiv]](https://arxiv.org/abs/2505.20137v2)
 
 [![arXiv](https://img.shields.io/badge/arXiv-2505.20137-b31b1b.svg)](https://arxiv.org/abs/2505.20137)
 [![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/downloads/)
 [![PyTorch Lightning](https://img.shields.io/badge/pytorch-lightning-purple.svg?logo=PyTorch%20Lightning)](https://github.com/Lightning-AI/pytorch-lightning)
 [![wandb](https://raw.githubusercontent.com/wandb/assets/main/wandb-github-badge-gradient.svg)](https://github.com/wandb/wandb)
+
+> **Note:** this branch serves an archival purpose, storing the code as it was for the Error Optimization paper. I highly recommend taking a look at the renewed version [(the ePC paper)](https://arxiv.org/abs/2505.20137) for an improved explanation, together with additional experiments of which the code can be found in the `main` branch.
 
 ---
 
