@@ -20,7 +20,7 @@ def class_predictor(dim_in: int, dim_out: int, use_CELoss: bool):
     )
 
 
-def get_architecture(dataset: str, use_CELoss: bool):
+def get_architecture(dataset: str, use_CELoss: bool = False):
     if dataset == "EMNIST" or dataset == "FashionMNIST":
         architecture = [
             nn.Sequential(MyLinear(28 * 28, 128), nn.GELU()),
