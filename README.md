@@ -1,7 +1,7 @@
 
 # ePC: a Predictive Coding algorithm that scales
 
-_Official codebase for "**ePC: Overcoming Exponential Signal Decay in Deep Predictive Coding Networks**"_ [[arXiv]](https://arxiv.org/abs/2505.20137)
+_Official codebase for "**ePC: Fast and Deep Predictive Coding for Digital Hardware**"_ [[arXiv]](https://arxiv.org/abs/2505.20137)
 
 [![arXiv](https://img.shields.io/badge/arXiv-2505.20137-b31b1b.svg)](https://arxiv.org/abs/2505.20137)
 [![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/downloads/)
@@ -113,7 +113,7 @@ _All experiment configs, logging, and results generation go directly to wandb._
 If our work helps your research, please cite:
 ```bibTeX
 @article{goemaere2025ePC,
-	title = {ePC: Overcoming Exponential Signal Decay in Deep Predictive Coding Networks},
+	title = {ePC: Fast and Deep Predictive Coding for Digital Hardware},
 	author = {C\'edric Goemaere and Gaspard Oliviers and Rafal Bogacz and Thomas Demeester},
 	year = {2025},
 	journal = {arXiv preprint arXiv: 2505.20137}
