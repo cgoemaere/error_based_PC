@@ -97,6 +97,7 @@ Launch `PredictiveCodingPlayground.ipynb`  in Jupyter for hands-on experimentati
 		- Fig. B.1: `fig1_float64_binomial.ipynb`
 		- Fig. 5: `analysis_deep_linear.ipynb`
 		- Fig. C.1: `analysis_deep_linear.ipynb`
+  		- Fig. D.1: `fig1_muPC.ipynb`
 		- Fig. D.2: `analysis_deep_MLP.ipynb`
 	
 
