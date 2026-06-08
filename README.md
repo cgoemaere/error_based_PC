@@ -1,7 +1,7 @@
 
 # ePC: a Predictive Coding algorithm that scales
 
-_Official codebase for "**ePC: Fast and Deep Predictive Coding for Digital Hardware**"_ [[arXiv]](https://arxiv.org/abs/2505.20137)
+_Official codebase for "**ePC: Fast and Deep Predictive Coding in Digital Simulation**" (ICML 2026)_
 
 [![arXiv](https://img.shields.io/badge/arXiv-2505.20137-b31b1b.svg)](https://arxiv.org/abs/2505.20137)
 [![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/downloads/)
@@ -10,24 +10,24 @@ _Official codebase for "**ePC: Fast and Deep Predictive Coding for Digital Hardw
 
 ---
 
-## 👉 What ePC can do for you
+## What ePC can do for you
 
-On digital hardware, traditional state-based Predictive Coding (sPC) suffers from extreme signal decay.  
-This is why it doesn't work well for deep networks (5+ layers).
+Traditional Predictive Coding (sPC) requires a dedicated, physical implementation to work well (e.g., an analog chip).
+By contrast, in digital simulation (i.e., running the algorithm numerically on a computer), sPC is very slow and does not scale well, as observed in [prior work](https://arxiv.org/pdf/2407.01163).
 
-Error-based PC fixes that:
+ePC fixes that:
 
-| State-based PC | Error-based PC |
+| sPC _(standard)_ | ePC _(ours)_ |
 |---|---|
+| 🧠 Meant for neuromorphic hardware | 🖥️ **Designed for GPUs** |
 | 🚫 Struggles with depth (4-5 layers max) | ✅ **Scales to any depth you want** |
 | 🐌 Slow convergence (thousands of iterations) | ⚡ **100-1000x faster convergence** |
 | 📉 Poor performance on deep networks | 🎯 **Matches backprop performance** |
 | 📃 Energy minimization, local weight updates | 📋 **Verified 100% still PC** |
-| 🧠 Meant for neuromorphic hardware | 🖥️ **Designed for GPUs** |
 
-**Bottom line**: If you're working with Predictive Coding on digital hardware, ePC is what you need. Using sPC *will* lead to incorrect conclusions!
+**Bottom line**: If you want to run Predictive Coding in Python, ePC is what you need. Using sPC *will* lead to incorrect conclusions!
 
-## ⚡ Quickstart
+## Quickstart
 
 1.  **Install dependencies via Conda**
 	```bash
@@ -44,7 +44,7 @@ Error-based PC fixes that:
 2.  **Play around with the interactive notebook**  
 Launch `PredictiveCodingPlayground.ipynb`  in Jupyter for hands-on experimentation with sPC and ePC.
 
-## 📂 Repository structure
+## Repo structure
 
 ```code
 > main branch              # Code for MNIST & FashionMNIST
@@ -63,7 +63,7 @@ Launch `PredictiveCodingPlayground.ipynb`  in Jupyter for hands-on experimentati
 └── ...
 ```
 
-## 📊 Reproducing our results
+## Reproducing our results
 
 > [!IMPORTANT]  
 > For historical reasons, the codebase uses `SO` for sPC and `EO` for ePC (from earlier names "State Optimization" and "Error Optimization"). These names were preserved to maintain code stability.
@@ -97,7 +97,7 @@ Launch `PredictiveCodingPlayground.ipynb`  in Jupyter for hands-on experimentati
 		- Fig. B.1: `fig1_float64_binomial.ipynb`
 		- Fig. 5: `analysis_deep_linear.ipynb`
 		- Fig. C.1: `analysis_deep_linear.ipynb`
-		- Fig. D.1: `analysis_deep_MLP.ipynb`
+		- Fig. D.2: `analysis_deep_MLP.ipynb`
 	
 
 -  **Reproduce CIFAR-10/100 experiments**
@@ -108,14 +108,14 @@ Launch `PredictiveCodingPlayground.ipynb`  in Jupyter for hands-on experimentati
 
 _All experiment configs, logging, and results generation go directly to wandb._
 
-## 📚 Citation
+## Citation
 
 If our work helps your research, please cite:
 ```bibTeX
-@article{goemaere2025ePC,
-	title = {ePC: Fast and Deep Predictive Coding for Digital Hardware},
+@article{goemaere2026ePC,
+	title = {ePC: Fast and Deep Predictive Coding in Digital Simulation},
 	author = {C\'edric Goemaere and Gaspard Oliviers and Rafal Bogacz and Thomas Demeester},
-	year = {2025},
-	journal = {arXiv preprint arXiv: 2505.20137}
+	year = {2026},
+	journal = {Forty-third International Conference on Machine Learning}
 }
 ```
